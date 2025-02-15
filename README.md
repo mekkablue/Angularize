@@ -1,6 +1,6 @@
 # Angularize
 
-*Filter > Angularize* subdivided curves into straight line segments.
+*Filter > Angularize* subdivides curves into straight line segments.
 
 ![Angularize Screenshot](Angularize.png)
 
@@ -12,7 +12,7 @@ Install the filter through *Window > Plugin Manager > Plugins.* Make sure Python
 
 ### Usage
 
-In Edit view, pick *Angularize* from the *Filter* menu. But you can also add it as a *Filter* custom parameter in *Font Info > Exports.*
+In Edit view, pick *Angularize* from the *Filter* menu. But you can also add it as a *Filter* custom parameter in *Font Info > Exports,* with a value such as `Angularize; segmentLength: 100` (sample segment length 100, adjust to your needs).
 
 ### Requirements
 
