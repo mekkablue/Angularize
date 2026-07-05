@@ -16,9 +16,9 @@
 
 from __future__ import division, print_function, unicode_literals
 import objc
-from GlyphsApp import Glyphs, GSPath, GSNode, GSPathSegment, GSSHARP, LINE, CURVE, OFFCURVE
+from GlyphsApp import Glyphs, GSPath, GSNode, GSPathSegment, GSSHARP, LINE, CURVE
 from GlyphsApp.plugins import FilterWithDialog
-from AppKit import NSPoint
+from Foundation import NSPoint
 from copy import copy
 
 
@@ -37,7 +37,7 @@ def calculateBezierPoint(t, A, B, C, D):
 	x2, y2 = B.x, B.y
 	x3, y3 = C.x, C.y
 	x4, y4 = D.x, D.y
-	
+
 	x = x1*(1-t)**3 + x2*3*t*(1-t)**2 + x3*3*t**2*(1-t) + x4*t**3
 	y = y1*(1-t)**3 + y2*3*t*(1-t)**2 + y3*3*t**2*(1-t) + y4*t**3
 
@@ -50,7 +50,7 @@ def divideSegment(length, A, B, C, D):
 		B.position,
 		C.position,
 		D.position,
-		)
+	)
 	parts = int(round(segmentLength / length))
 	nodes = []
 	for i in range(1, parts+1):
@@ -64,22 +64,22 @@ def divideSegment(length, A, B, C, D):
 	return nodes
 
 
-def turnCurveToLinesOnLayer(layer, length=100):
+def turnCurveToLinesOnLayer(layer, length=100.0):
 	for path in layer.paths:
 		newPath = GSPath()
 		for node in path.nodes:
-			if node.type == LINE: # LINE, CURVE or OFFCURVE
+			if node.type == LINE:  # LINE, CURVE or OFFCURVE
 				newNode = copy(node)
 				newNode.connection = GSSHARP
 				newPath.nodes.append(newNode)
 			elif node.type == CURVE:
 				newNodes = divideSegment(
-					max(3.0, length), # sanity check: min length of 3 
+					max(3.0, length),  # sanity check: min length of 3
 					node.prevNode.prevNode.prevNode,
 					node.prevNode.prevNode,
 					node.prevNode,
 					node,
-					)
+				)
 				for newNode in newNodes:
 					newPath.nodes.append(newNode)
 			else:
@@ -120,18 +120,18 @@ class Angularize(FilterWithDialog):
 		Glyphs.registerDefault(
 			'com.mekkablue.Angularize.segmentLength',
 			15.0,
-			)
+		)
 
 		# Set value of text field
 		self.segmentLengthField.setStringValue_(
 			Glyphs.defaults['com.mekkablue.Angularize.segmentLength']
-			)
+		)
 
 		# Set focus to text field
 		self.segmentLengthField.becomeFirstResponder()
 
-
 	# Action triggered by UI
+
 	@objc.IBAction
 	def setSegmentLength_(self, sender):
 
@@ -141,12 +141,12 @@ class Angularize(FilterWithDialog):
 		# Trigger redraw
 		self.update()
 
-
 	# Actual filter
+
 	@objc.python_method
 	def filter(self, layer, inEditView, customParameters):
 		segmentLength = float(Glyphs.defaults['com.mekkablue.Angularize.segmentLength'])
-		
+
 		# Called on font export, get value from customParameters
 		if "segmentLength" in customParameters:
 			segmentLength = float(customParameters['segmentLength'])
@@ -154,14 +154,12 @@ class Angularize(FilterWithDialog):
 		# Shift all nodes in x and y direction by the value
 		turnCurveToLinesOnLayer(layer, length=segmentLength)
 
-
 	@objc.python_method
 	def generateCustomParameter(self):
 		return "%s; segmentLength:%s;" % (
 			self.__class__.__name__,
 			Glyphs.defaults['com.mekkablue.Angularize.segmentLength'],
-			)
-
+		)
 
 	@objc.python_method
 	def __file__(self):
